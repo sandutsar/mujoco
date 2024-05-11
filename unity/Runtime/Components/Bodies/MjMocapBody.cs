@@ -19,7 +19,11 @@ using UnityEngine;
 namespace Mujoco {
   public class MjMocapBody : MjBaseBody {
     protected override void OnParseMjcf(XmlElement mjcf) {
-      throw new Exception("parsing mocap bodies isn't supported.");
+      // Transform
+      transform.localPosition =
+          MjEngineTool.UnityVector3(mjcf.GetVector3Attribute("pos", defaultValue: Vector3.zero));
+      transform.localRotation = MjEngineTool.UnityQuaternion(
+          mjcf.GetQuaternionAttribute("quat", defaultValue: MjEngineTool.MjQuaternionIdentity));
     }
 
     protected override unsafe void OnBindToRuntime(MujocoLib.mjModel_* model, MujocoLib.mjData_* data) {
@@ -35,8 +39,10 @@ namespace Mujoco {
     }
 
     public override unsafe void OnSyncState(MujocoLib.mjData_* data) {
-      MjEngineTool.SetMjVector3(data->mocap_pos, transform.position, MujocoId);
-      MjEngineTool.SetMjQuaternion(data->mocap_quat, transform.rotation, MujocoId);
+      MjEngineTool.SetMjVector3(
+          MjEngineTool.MjVector3AtEntry(data->mocap_pos, MujocoId), transform.position);
+      MjEngineTool.SetMjQuaternion(
+          MjEngineTool.MjQuaternionAtEntry(data->mocap_quat, MujocoId), transform.rotation);
     }
   }
 }

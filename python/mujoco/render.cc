@@ -14,10 +14,12 @@
 
 #include <array>
 #include <cstdint>
+#include <optional>
+#include <type_traits>
 
 #include <Eigen/Core>
-#include <mjrender.h>
-#include <mujoco.h>
+#include <mujoco/mjrender.h>
+#include <mujoco/mujoco.h>
 #include "errors.h"
 #include "function_traits.h"
 #include "functions.h"
@@ -40,7 +42,10 @@ class MjWrapper<raw::MjrContext> : public WrapperBase<raw::MjrContext> {
 
   void Free();
 
-#define X(var) py_array_or_tuple_t<mjtNum> var
+  #define X(var)                                                   \
+    py_array_or_tuple_t<                                           \
+        std::remove_all_extents_t<decltype(raw::MjrContext::var)>> \
+        var
   X(fogRGBA);
   X(auxWidth);
   X(auxHeight);
@@ -155,6 +160,7 @@ PYBIND11_MODULE(_render, pymodule) {
   mjrRect.def("__deepcopy__", [](const raw::MjrRect& other, py::dict) {
     return raw::MjrRect(other);
   });
+  DefineStructFunctions(mjrRect);
 #define X(var) mjrRect.def_readwrite(#var, &raw::MjrRect::var)
   X(left);
   X(bottom);
@@ -213,6 +219,8 @@ PYBIND11_MODULE(_render, pymodule) {
   X(windowStereo);
   X(windowDoublebuffer);
   X(currentBuffer);
+  X(readPixelFormat);
+  X(readDepthMap);
 #undef X
 
 #define X(var)                      \
@@ -248,6 +256,7 @@ PYBIND11_MODULE(_render, pymodule) {
   Def<traits::mjr_changeFont>(pymodule);
   Def<traits::mjr_addAux>(pymodule);
   // Skipped: mjr_freeContext (have MjrContext.__del__)
+  Def<traits::mjr_resizeOffscreen>(pymodule);
   Def<traits::mjr_uploadTexture>(pymodule);
   Def<traits::mjr_uploadMesh>(pymodule);
   Def<traits::mjr_uploadHField>(pymodule);

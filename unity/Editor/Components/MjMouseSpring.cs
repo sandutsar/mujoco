@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if UNITY_EDITOR
 using System;
 using UnityEditor;
 using UnityEngine;
@@ -23,7 +22,7 @@ namespace Mujoco {
   // and left mouse drag will apply a force on the body.  Holding shift down will change the applied
   // force direction between World XZ plane and Y[camera-up].
 
-  [CustomEditor(typeof(MjBody))]
+  [CustomEditor(typeof(MjComponent), true)]
   public class MjMouseSpring : Editor {
     private bool _lastShiftKeyState = false;
 
@@ -102,7 +101,11 @@ namespace Mujoco {
         return;
       }
 
-      MjBody body = target as MjBody;
+      var targetObject = target as MjComponent;
+      MjBody body = targetObject.GetComponentInParent<MjBody>();
+      if(!body)
+        return;
+
       Vector3 bodyPosition =
           body != null ? body.transform.position : Vector3.zero;
       var scene = MjScene.Instance;
@@ -159,7 +162,8 @@ namespace Mujoco {
               MujocoLib.mj_objectVelocity(
                   scene.Model, scene.Data, (int)MujocoLib.mjtObj.mjOBJ_BODY, body.MujocoId, res, 0);
               // linear velocity is in the last 3 entries
-              bodyVel = MjEngineTool.UnityVector3(res, 1);
+              bodyVel = MjEngineTool.UnityVector3(
+                  MjEngineTool.MjVector3AtEntry(res, 1));
             }
 
             float springStiffness = 100;
@@ -187,4 +191,3 @@ namespace Mujoco {
     }
   }
 }
-#endif

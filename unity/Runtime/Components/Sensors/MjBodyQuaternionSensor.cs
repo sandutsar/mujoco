@@ -20,7 +20,7 @@ using UnityEngine;
 namespace Mujoco {
 
 public class MjBodyQuaternionSensor : MjBaseSensor {
-  public MjBody Body;
+  public MjBaseBody Body;
 
   [Tooltip("Should the Frame sensors use the inertial or the regular frame of reference.")]
   public bool UseInertialFrame;
@@ -39,14 +39,14 @@ public class MjBodyQuaternionSensor : MjBaseSensor {
 
   protected override void FromMjcf(XmlElement mjcf) {
     UseInertialFrame = mjcf.HasAttribute("body");
-    Body = mjcf.GetObjectReferenceAttribute<MjBody>("objname");
+    Body = mjcf.GetObjectReferenceAttribute<MjBaseBody>("objname");
     if (Body == null) {
       throw new NullReferenceException("Missing a reference to a MjBody.");
     }
   }
 
   public override unsafe void OnSyncState(MujocoLib.mjData_* data) {
-    SensorReading = MjEngineTool.UnityQuaternion(data->sensordata, _sensorAddress);
+    SensorReading = MjEngineTool.UnityQuaternion(data->sensordata + _sensorAddress);
   }
 }
 }

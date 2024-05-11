@@ -16,7 +16,7 @@
 
 from absl.testing import absltest
 
-from google3.third_party.mujoco.introspect import enums
+from . import enums
 
 
 class EnumsTest(absltest.TestCase):
@@ -41,9 +41,10 @@ class EnumsTest(absltest.TestCase):
         tuple(enum_decl.values.items()), (('mjENBL_OVERRIDE', 1<<0),
                                           ('mjENBL_ENERGY', 1<<1),
                                           ('mjENBL_FWDINV', 1<<2),
-                                          ('mjENBL_SENSORNOISE', 1<<3),
-                                          ('mjENBL_MULTICCD', 1<<30),
-                                          ('mjNENABLE', 5)))
+                                          ('mjENBL_INVDISCRETE', 1<<3),
+                                          ('mjENBL_MULTICCD', 1<<4),
+                                          ('mjENBL_ISLAND', 1<<5),
+                                          ('mjNENABLE', 6)))
 
   # values mostly increment by one with occasional overrides
   def test_mjtGeom(self):  # pylint: disable=invalid-name
@@ -59,6 +60,7 @@ class EnumsTest(absltest.TestCase):
     self.assertEqual(enum_decl.values['mjGEOM_ARROW'], 100)
     self.assertEqual(enum_decl.values['mjGEOM_ARROW1'], 101)
     self.assertEqual(enum_decl.values['mjGEOM_ARROW2'], 102)
+    self.assertEqual(enum_decl.values['mjGEOM_TRIANGLE'], 108)
     # Skip a few...
 
     self.assertEqual(enum_decl.values['mjGEOM_NONE'], 1001)

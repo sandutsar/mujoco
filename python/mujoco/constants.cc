@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <utility>
 #include <vector>
-#include <mjmodel.h>
-#include <mjvisualize.h>
-#include <mujoco.h>
+#include <mujoco/mjmodel.h>
+#include <mujoco/mjvisualize.h>
+#include <mujoco/mujoco.h>
 #include <pybind11/cast.h>
 #include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
 
 namespace mujoco::python {
 namespace {
@@ -32,7 +32,7 @@ py::tuple MakeTuple(
   for (int i = 0; i < N; i++) {
     result.append(py::str(strings[i]));
   }
-  return result;
+  return std::move(result);
 }
 
 template <auto N>
@@ -44,7 +44,7 @@ py::tuple MakeTuple(const char* (&strings)[N][3]) {
         py::str(strings[i][1]),
         py::str(strings[i][2])));
   }
-  return result;
+  return std::move(result);
 }
 
 PYBIND11_MODULE(_constants, pymodule) {
@@ -77,6 +77,9 @@ PYBIND11_MODULE(_constants, pymodule) {
 
   // from mujoco.h
   X(mjVERSION_HEADER);
+
+  // from mjtnum.h
+  X(mjMINVAL);
 
   #undef X
   pymodule.attr("mjDISABLESTRING") = MakeTuple(mjDISABLESTRING);
